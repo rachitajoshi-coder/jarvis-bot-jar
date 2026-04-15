@@ -6,8 +6,13 @@ const app = new App({
 });
 
 app.message(async ({ message, say }) => {
-  await say("Hi, I’m Jarvis! How can I help?");
+if (message.text.toLowerCase().includes("leave")) {
+await say("You have 12 Earned Leaves, 8 Sick Leaves and 7 Casual Leaves in a year");
+} else {
+await say("Hi, I’m Jarvis! How can I help?");
+}
 });
+
 
 (async () => {
   await app.start(3000);
