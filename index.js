@@ -6,7 +6,7 @@ const app = new App({
 });
 
 app.message(async ({ message, say }) => {
-  await say("Hi, I’m Jarvis 👋");
+  await say("Hi, I’m Jarvis! How can I help?);
 });
 
 (async () => {
