@@ -20,6 +20,9 @@ app.message(async ({ message, say }) => {
 } else if (["how are you", "sup", "whatsup", "wasgud"].some(word => text.includes(word))) {
   await say("I'm great, how is your day going?");
 
+} else if (["thanks", "thank you"].some(word => text.includes(word))) {
+await say ("You're welcome! Have a nice day :)");
+
   } else {
     await say("Hi, I’m Jarvis! How can I help? Please note: I am still under testing, hold tight!");
   }
