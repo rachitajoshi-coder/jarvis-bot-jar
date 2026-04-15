@@ -21,7 +21,7 @@ app.message(async ({ message, say }) => {
   await say("I'm great, how is your day going?");
 
   } else {
-    await say("Hi, I’m Jarvis! How can I help?");
+    await say("Hi, I’m Jarvis! How can I help? Please note: I am still under testing, hold tight!");
   }
 });
 
