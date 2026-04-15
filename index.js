@@ -23,6 +23,9 @@ app.message(async ({ message, say }) => {
 } else if (["thanks", "thank you"].some(word => text.includes(word))) {
 await say ("You're welcome! Have a nice day :)");
 
+} else if (text.includes("bye")) {
+await say ("Bye! Until next time.");
+
   } else {
     await say("Hi, I’m Jarvis! How can I help? Please note: I am still under testing, hold tight!");
   }
