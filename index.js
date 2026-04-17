@@ -5,6 +5,9 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
+const userWarnings = {};
+const bannedUsers = {};
+
 app.message(async ({ message, say, client }) => {
   const text = message.text?.toLowerCase();
 
@@ -12,18 +15,53 @@ app.message(async ({ message, say, client }) => {
     return;
   }
 
+  const userId = message.user;
+
+  if (bannedUsers[userId]) {
+    const banEnd = bannedUsers[userId];
+
+    if (Date.now() < banEnd) {
+      await say("⛔ You are temporarily blocked due to repeated inappropriate language. Please try again later.");
+      return;
+    } else {
+      delete bannedUsers[userId]; 
+    }
+  }
+
   const bannedWords = ["shit", "fuck", "bitch", "asshole", "ass hole","ass","gandu","chod"];
   const hasBadWord = bannedWords.some(word => text.includes(word));
 
   if (hasBadWord) {
-    await say("⚠️ Please avoid using inappropriate language.");
+    if (!userWarnings[userId]) {
+      userWarnings[userId] = 0;
+    }
+
+    userWarnings[userId]++;
+    const warnings = userWarnings[userId];
+
+    if (warnings >= 3) {
+      const banDuration = 60 * 60 * 1000; // 1 hour
+      bannedUsers[userId] = Date.now() + banDuration;
+
+      await say("⛔ You are temporarily blocked due to repeated inappropriate language. Please try again later.");
+
+      await client.chat.postMessage({
+        channel: "U0AQL0W10NB",
+        text: `🚫 User <@${userId}> has been banned for 1 hour after ${warnings} violations.`
+      });
+
+      userWarnings[userId] = 0; // reset after ban
+      return;
+    }
+
+    await say(`⚠️ Warning ${warnings}/3: Please avoid inappropriate language.`);
 
     await client.chat.postMessage({
       channel: "U0AQL0W10NB",
-      text: `🚨 Alert: <@${message.user}> used inappropriate language: "${message.text}"`
+      text: `⚠️ User <@${userId}> warning ${warnings}/3. Message: "${message.text}"`
     });
 
-    return; 
+    return;
   }
 
   if (text.includes("leave")) {
@@ -41,8 +79,8 @@ app.message(async ({ message, say, client }) => {
   } else if (["thanks", "thank you"].some(word => text.includes(word))) {
     await say("You're welcome! Have a nice day :)");
 
-} else if (["wfh", "work from home"].some(word => text.includes(word))) {
-await say("You have 2 WFH days in a month which you can avail with prior alignment with your reporting manager. Additional days can be availed with approval from the reporting manager with HR Ops team in loop.");
+  } else if (["wfh", "work from home"].some(word => text.includes(word))) {
+    await say("You have 2 WFH days in a month which you can avail with prior alignment with your reporting manager. Additional days can be availed with approval from the reporting manager with HR Ops team in loop.");
 
   } else if (["about jar", "about the company", "about our company"].some(word => text.includes(word))) {
     await say("Jar is a popular Indian fintech app that helps users automatically save money and invest in 24-karat digital gold, starting from as low as ₹10. Founded in 2021 by Misbah Ashraf and Nishchay AG, it targets financial inclusion by automating daily savings, allowing users to invest spare change via UPI, and securing the gold through insurers like ICICI Lombard.");
