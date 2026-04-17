@@ -54,7 +54,7 @@ Wanna hear another one? Say "tell me another one"`);
 
 } else if (text.includes("tell me another one")) {
 await say ("What did the tree say to the lumberjack?
-I'm falling for you 🌲❤️")) 
+I'm falling for you 🌲❤️");
 
   } else {
     await say("Hi, I’m Jarvis! How can I help? Please note: I am still under testing, hold tight!");
