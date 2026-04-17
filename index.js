@@ -48,18 +48,13 @@ app.message(async ({ message, say, client }) => {
     await say("Bye! Until next time.");
 
 } else if (text.includes("tell me a joke")) {
-await say ("Why don't scientists trust atoms? 
-
+await say (`Why don't scientists trust atoms? 
 Because they make up everything!! 🤥
-
-
-Wanna hear another one? Say "tell me another one"");
+Wanna hear another one? Say "tell me another one"`);
 
 } else if (text.includes("tell me another one")) {
 await say ("What did the tree say to the lumberjack?
-
-
-I'm falling for you 🌲❤️")) {
+I'm falling for you 🌲❤️")) 
 
   } else {
     await say("Hi, I’m Jarvis! How can I help? Please note: I am still under testing, hold tight!");
