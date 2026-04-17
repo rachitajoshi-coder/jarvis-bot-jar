@@ -41,6 +41,9 @@ app.message(async ({ message, say, client }) => {
   } else if (["thanks", "thank you"].some(word => text.includes(word))) {
     await say("You're welcome! Have a nice day :)");
 
+} else if (["wfh", "work from home"].some(word => text.includes(word))) {
+await say("You have 2 WFH days in a month which you can avail with prior alignment with your reporting manager. Additional days can be availed with approval from the reporting manager with HR Ops team in loop.");
+
   } else if (["about jar", "about the company", "about our company"].some(word => text.includes(word))) {
     await say("Jar is a popular Indian fintech app that helps users automatically save money and invest in 24-karat digital gold, starting from as low as ₹10. Founded in 2021 by Misbah Ashraf and Nishchay AG, it targets financial inclusion by automating daily savings, allowing users to invest spare change via UPI, and securing the gold through insurers like ICICI Lombard.");
 
