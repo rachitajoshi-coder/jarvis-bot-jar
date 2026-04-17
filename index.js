@@ -6,24 +6,26 @@ const app = new App({
 });
 
 app.message(async ({ message, say, client }) => {
-  const text = message.text.toLowerCase();
+  const text = message.text?.toLowerCase();
 
-  const bannedWords = ["shit", "fuck", "bitch", "asshole"];
+  if (message.subtype || message.bot_id) {
+    return;
+  }
 
+  const bannedWords = ["shit", "fuck", "bitch", "asshole", "ass hole","ass","gandu","chod"];
   const hasBadWord = bannedWords.some(word => text.includes(word));
 
   if (hasBadWord) {
     await say("⚠️ Please avoid using inappropriate language.");
 
     await client.chat.postMessage({
-      channel: "U0AQL0W10NB", 
+      channel: "U0AQL0W10NB",
       text: `🚨 Alert: <@${message.user}> used inappropriate language: "${message.text}"`
     });
 
-    return; // stop further execution
+    return; 
   }
 
-  // 🧠 Normal bot logic
   if (text.includes("leave")) {
     await say("You have 12 Earned Leaves, 8 Sick Leaves and 7 Casual Leaves in a year");
 
