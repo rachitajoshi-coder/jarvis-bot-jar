@@ -8,6 +8,8 @@ const app = new App({
 const userWarnings = {};
 const bannedUsers = {};
 
+const adminUsers = ["U0AQL0W10NB"];
+
 app.message(async ({ message, say, client }) => {
   const text = message.text?.toLowerCase();
 
@@ -17,51 +19,56 @@ app.message(async ({ message, say, client }) => {
 
   const userId = message.user;
 
-  if (bannedUsers[userId]) {
-    const banEnd = bannedUsers[userId];
+  const isAdmin = adminUsers.includes(userId);
 
-    if (Date.now() < banEnd) {
-      await say("⛔ You are temporarily blocked due to repeated inappropriate language. Please try again later.");
-      return;
-    } else {
-      delete bannedUsers[userId]; 
-    }
-  }
+  if (!isAdmin) {
 
-  const bannedWords = ["shit", "fuck", "bitch", "asshole", "ass hole","ass","gandu","chod"];
-  const hasBadWord = bannedWords.some(word => text.includes(word));
+    if (bannedUsers[userId]) {
+      const banEnd = bannedUsers[userId];
 
-  if (hasBadWord) {
-    if (!userWarnings[userId]) {
-      userWarnings[userId] = 0;
+      if (Date.now() < banEnd) {
+        await say("⛔ You are temporarily blocked due to repeated inappropriate language usage. Please try again later.");
+        return;
+      } else {
+        delete bannedUsers[userId]; 
+      }
     }
 
-    userWarnings[userId]++;
-    const warnings = userWarnings[userId];
+    const bannedWords = ["bastard", "fuck", "bitch", "asshole", "ass hole","ass","gandu","chod","loude","lowde","louda"];
+    const hasBadWord = bannedWords.some(word => text.includes(word));
 
-    if (warnings >= 3) {
-      const banDuration = 60 * 60 * 1000; // 1 hour
-      bannedUsers[userId] = Date.now() + banDuration;
+    if (hasBadWord) {
+      if (!userWarnings[userId]) {
+        userWarnings[userId] = 0;
+      }
 
-      await say("⛔ You are temporarily blocked due to repeated inappropriate language. Please try again later.");
+      userWarnings[userId]++;
+      const warnings = userWarnings[userId];
+
+      if (warnings >= 3) {
+        const banDuration = 60 * 60 * 1000;
+        bannedUsers[userId] = Date.now() + banDuration;
+
+        await say("⛔ You are temporarily blocked due to repeated inappropriate language. Please try again later.");
+
+        await client.chat.postMessage({
+          channel: "U0AQL0W10NB",
+          text: `🚫 User <@${userId}> has been banned for 1 hour after ${warnings} violations.`
+        });
+
+        userWarnings[userId] = 0;
+        return;
+      }
+
+      await say(`⚠️ Warning ${warnings}/3: Please avoid inappropriate language.`);
 
       await client.chat.postMessage({
         channel: "U0AQL0W10NB",
-        text: `🚫 User <@${userId}> has been banned for 1 hour after ${warnings} violations.`
+        text: `⚠️ User <@${userId}> warning ${warnings}/3. Message: "${message.text}"`
       });
 
-      userWarnings[userId] = 0; // reset after ban
       return;
     }
-
-    await say(`⚠️ Warning ${warnings}/3: Please avoid inappropriate language.`);
-
-    await client.chat.postMessage({
-      channel: "U0AQL0W10NB",
-      text: `⚠️ User <@${userId}> warning ${warnings}/3. Message: "${message.text}"`
-    });
-
-    return;
   }
 
   if (text.includes("leave")) {
