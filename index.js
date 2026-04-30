@@ -72,7 +72,7 @@ app.message(async ({ message, say, client }) => {
   }
 
   if (text.includes("leave")) {
-    await say("You have 12 Earned Leaves, 8 Sick Leaves and 7 Casual Leaves in a year");
+    await say("You have 15 Earned Leaves, 8 Sick Leaves and 7 Casual Leaves in a year");
 
   } else if (text.includes("holiday")) {
     await say("To check your holidays for this calendar year, go to Keka → Home → Dashboard → Holidays");
