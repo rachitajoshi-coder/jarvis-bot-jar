@@ -8,107 +8,157 @@ const app = new App({
 const userWarnings = {};
 const bannedUsers = {};
 
+
+const processedMessages = new Set();
+
 const adminUsers = ["U0AQL0W10NB"];
 
 app.message(async ({ message, say, client }) => {
-  const text = message.text?.toLowerCase();
 
-  if (message.subtype || message.bot_id) {
-    return;
-  }
+  try {
 
-  const userId = message.user;
+   
+    const text = (message.text || "").toLowerCase();
 
-  const isAdmin = adminUsers.includes(userId);
-
-  if (!isAdmin) {
-
-    if (bannedUsers[userId]) {
-      const banEnd = bannedUsers[userId];
-
-      if (Date.now() < banEnd) {
-        await say("⛔ You are temporarily blocked due to repeated inappropriate language usage. Please try again later.");
-        return;
-      } else {
-        delete bannedUsers[userId]; 
-      }
+    if (message.subtype || message.bot_id) {
+      return;
     }
 
-    const bannedWords = ["bastard", "fuck", "bitch", "asshole", "ass hole","ass","gandu","chod","loude","lowde","louda"];
-    const hasBadWord = bannedWords.some(word => text.includes(word));
+    if (processedMessages.has(message.ts)) {
+      return;
+    }
 
-    if (hasBadWord) {
-      if (!userWarnings[userId]) {
-        userWarnings[userId] = 0;
+    processedMessages.add(message.ts);
+
+    setTimeout(() => {
+      processedMessages.delete(message.ts);
+    }, 5 * 60 * 1000);
+
+    const userId = message.user;
+
+    const isAdmin = adminUsers.includes(userId);
+
+    if (!isAdmin) {
+
+      if (bannedUsers[userId]) {
+        const banEnd = bannedUsers[userId];
+
+        if (Date.now() < banEnd) {
+          await say("⛔ You are temporarily blocked due to repeated inappropriate language usage. Please try again later.");
+          return;
+        } else {
+          delete bannedUsers[userId];
+        }
       }
 
-      userWarnings[userId]++;
-      const warnings = userWarnings[userId];
+      const bannedWords = [
+        "bastard",
+        "fuck",
+        "bitch",
+        "asshole",
+        "ass hole",
+        "gandu",
+        "chod",
+        "loude",
+        "lowde",
+        "louda"
+      ];
 
-      if (warnings >= 3) {
-        const banDuration = 60 * 60 * 1000;
-        bannedUsers[userId] = Date.now() + banDuration;
+      const hasBadWord = bannedWords.some(word => text.includes(word));
 
-        await say("⛔ You are temporarily blocked due to repeated inappropriate language. Please try again later.");
+      if (hasBadWord) {
+
+        if (!userWarnings[userId]) {
+          userWarnings[userId] = 0;
+        }
+
+        userWarnings[userId]++;
+        const warnings = userWarnings[userId];
+
+        if (warnings >= 3) {
+
+          const banDuration = 60 * 60 * 1000; // 1 hour
+          bannedUsers[userId] = Date.now() + banDuration;
+
+          await say("⛔ You are temporarily blocked for 1 hour due to repeated inappropriate language.");
+
+          await client.chat.postMessage({
+            channel: "U0AQL0W10NB",
+            text: `🚫 User <@${userId}> has been banned for 1 hour after ${warnings} violations.`
+          });
+
+          userWarnings[userId] = 0;
+
+          return;
+        }
+
+        await say(`⚠️ Warning ${warnings}/3: Please avoid inappropriate language.`);
 
         await client.chat.postMessage({
           channel: "U0AQL0W10NB",
-          text: `🚫 User <@${userId}> has been banned for 1 hour after ${warnings} violations.`
+          text: `⚠️ User <@${userId}> warning ${warnings}/3. Message: "${message.text}"`
         });
 
-        userWarnings[userId] = 0;
         return;
       }
-
-      await say(`⚠️ Warning ${warnings}/3: Please avoid inappropriate language.`);
-
-      await client.chat.postMessage({
-        channel: "U0AQL0W10NB",
-        text: `⚠️ User <@${userId}> warning ${warnings}/3. Message: "${message.text}"`
-      });
-
-      return;
     }
-  }
 
-  if (text.includes("leave")) {
-    await say("You have 15 Earned Leaves, 8 Sick Leaves and 7 Casual Leaves in a year");
 
-  } else if (text.includes("holiday")) {
-    await say("To check your holidays for this calendar year, go to Keka → Home → Dashboard → Holidays");
+    if (text.includes("leave")) {
 
-  } else if (text.includes("salary")) {
-    await say("Salary is credited on the last day of the month. In case this day falls on a weekend, then the salary is credited on last weekday before the last day of the month");
+      await say("You have 15 Earned Leaves, 8 Sick Leaves and 7 Casual Leaves in a year");
 
-  } else if (["how are you", "sup", "whatsup", "wasgud"].some(word => text.includes(word))) {
-    await say("I'm great, how is your day going?");
+    } else if (text.includes("holiday")) {
 
-  } else if (["thanks", "thank you"].some(word => text.includes(word))) {
-    await say("You're welcome! Have a nice day :)");
+      await say("To check your holidays for this calendar year, go to Keka → Home → Dashboard → Holidays");
 
-  } else if (["wfh", "work from home"].some(word => text.includes(word))) {
-    await say("You have 2 WFH days in a month which you can avail with prior alignment with your reporting manager. Additional days can be availed with approval from the reporting manager with HR Ops team in loop.");
+    } else if (text.includes("salary")) {
 
-  } else if (["about jar", "about the company", "about our company"].some(word => text.includes(word))) {
-    await say("Jar is a popular Indian fintech app that helps users automatically save money and invest in 24-karat digital gold, starting from as low as ₹10. Founded in 2021 by Misbah Ashraf and Nishchay AG, it targets financial inclusion by automating daily savings, allowing users to invest spare change via UPI, and securing the gold through insurers like ICICI Lombard.");
+      await say("Salary is credited on the last day of the month. In case this day falls on a weekend, then the salary is credited on last weekday before the last day of the month");
 
-  } else if (text.includes("bye")) {
-    await say("Bye! Until next time.");
+    } else if (["how are you", "sup", "whatsup", "wasgud"].some(word => text.includes(word))) {
 
-  } else if (text.includes("tell me a joke")) {
-    await say(`Why don't scientists trust atoms?
+      await say("I'm great, how is your day going?");
+
+    } else if (["thanks", "thank you"].some(word => text.includes(word))) {
+
+      await say("You're welcome! Have a nice day :)");
+
+    } else if (["wfh", "work from home"].some(word => text.includes(word))) {
+
+      await say("You have 2 WFH days in a month which you can avail with prior alignment with your reporting manager. Additional days can be availed with approval from the reporting manager with HR Ops team in loop.");
+
+    } else if (["about jar", "about the company", "about our company"].some(word => text.includes(word))) {
+
+      await say("Jar is a popular Indian fintech app that helps users automatically save money and invest in 24-karat digital gold, starting from as low as ₹10. Founded in 2021 by Misbah Ashraf and Nishchay AG, it targets financial inclusion by automating daily savings, allowing users to invest spare change via UPI, and securing the gold through insurers like ICICI Lombard.");
+
+    } else if (text.includes("bye")) {
+
+      await say("Bye! Until next time.");
+
+    } else if (text.includes("tell me a joke")) {
+
+      await say(`Why don't scientists trust atoms?
 
 Because they make up everything!! 🤥
 
 Wanna hear another one? Say "tell me another one"`);
 
-  } else if (text.includes("tell me another one")) {
-    await say(`What did the tree say to the lumberjack?
+    } else if (text.includes("tell me another one")) {
+
+      await say(`What did the tree say to the lumberjack?
 
 I'm falling for you 🌲❤️`);
 
-  } else {
-    await say("Hi, I’m Jarvis! How can I help? Please note: I am still under testing, hold tight!");
+    } else {
+
+      await say("Hi, I’m Jarvis! How can I help? Please note: I am still under testing, hold tight!");
+    }
+
+  } catch (error) {
+
+    console.error("BOT ERROR:", error);
+
   }
 });
 
